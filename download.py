@@ -54,7 +54,7 @@ for imageid, labelname in zip(tqdm(imageid_and_labelname['ImageID']), imageid_an
         Thread(target=append, args=(__imageids, imageid)).start()
 
 del imageid_and_labelname
-
+__imageids = __imageids[:1]
 
 xmin_ymin_xmax_ymax = pd.read_csv(
     './open_images_data/oidv6-train-annotations-bbox.csv')
@@ -64,13 +64,15 @@ xmin_ymin_xmax_ymax.append(pd.read_csv(
     './open_images_data/validation-annotations-bbox.csv'))
 for i in tqdm(__imageids):
     info = xmin_ymin_xmax_ymax[xmin_ymin_xmax_ymax['ImageID'] == i]
-    if info['ImageID'] in __imageids and info['LabelName'] in labelnames:
-        # __imageids_and_bbox[info['ImageID']] = [
-        #     info['XMin'], info['YMin'], info['XMax'], info['YMax']]
-        Thread(target=append_dict, args=(__imageids_and_bbox, info['ImageID'], [
-               info['XMin'], info['YMin'], info['XMax'], info['YMax']])).start()
+    for index in range(len(info)):
+        index_info = info.iloc[index]
+        if index_info['ImageID'] in __imageids and index_info['LabelName'] in labelnames:
+            # __imageids_and_bbox[info['ImageID']] = [
+            #     info['XMin'], info['YMin'], info['XMax'], info['YMax']]
+            Thread(target=append_dict, args=(__imageids_and_bbox, index_info['ImageID'], [
+                   index_info['XMin'], index_info['YMin'], index_info['XMax'], index_info['YMax']])).start()
 del xmin_ymin_xmax_ymax
-
+__imageids_and_bbox = __imageids_and_bbox[:5000]
 urls = pd.read_csv(
     './open_images_data/oidv6-train-images-with-labels-with-rotation.csv')
 urls.append(pd.read_csv(
@@ -80,31 +82,36 @@ urls.append(pd.read_csv(
 urls.append(pd.read_csv(
     './open_images_data/validation-images-with-rotation.csv'))
 for i in tqdm(__imageids):
-    url = urls[urls['ImageID'] == i]
-    if url['ImageID'] in __imageids:
-        urlretrieve(url['OriginalURL'], f"./data/{image_id}.png")
-        xmin, ymin, xmax, ymax = __imageids_and_bbox[url['ImageID']]
-        # file_names.append(f"./data/{image_id}.png")
-        # type_of_data.append(url['Subset'])
-        # imageurls.append(url['OriginalURL'])
-        # imageurls_original.append(url['OriginalLandingURL'])
-        # imageids.append(url['ImageID'])
-        # xmins.append(xmin)
-        # ymins.append(ymin)
-        # xmaxs.append(xmax)
-        # ymaxs.append(ymax)
-        Thread(target=append, args=(ymaxs, ymax)).start()
-        Thread(target=append, args=(xmaxs, xmax)).start()
-        Thread(target=append, args=(ymins, ymin)).start()
-        Thread(target=append, args=(xmins, xmin)).start()
-        Thread(target=append, args=(imageids, url['ImageID'])).start()
-        Thread(target=append, args=(
-            imageurls_original, url['OriginalLandingURL'])).start()
-        Thread(target=append, args=(imageurls, url['OriginalURL'])).start()
-        Thread(target=append, args=(type_of_data, url['Subset'])).start()
-        Thread(target=append, args=(
-            file_names, f"./data/{image_id}.png")).start()
-        image_id += 1
+    url = urls[urls['ImageID'] == str(i)]
+    for index in range(len(info)):
+        index_info = info.iloc[index]
+        if index_info['ImageID'] in __imageids:
+            urlretrieve(index_info['OriginalURL'], f"./data/{image_id}.png")
+            xmin, ymin, xmax, ymax = __imageids_and_bbox[index_info['ImageID']]
+            # file_names.append(f"./data/{image_id}.png")
+            # type_of_data.append(url['Subset'])
+            # imageurls.append(url['OriginalURL'])
+            # imageurls_original.append(url['OriginalLandingURL'])
+            # imageids.append(url['ImageID'])
+            # xmins.append(xmin)
+            # ymins.append(ymin)
+            # xmaxs.append(xmax)
+            # ymaxs.append(ymax)
+            Thread(target=append, args=(ymaxs, ymax)).start()
+            Thread(target=append, args=(xmaxs, xmax)).start()
+            Thread(target=append, args=(ymins, ymin)).start()
+            Thread(target=append, args=(xmins, xmin)).start()
+            Thread(target=append, args=(
+                imageids, index_info['ImageID'])).start()
+            Thread(target=append, args=(
+                imageurls_original, index_info['OriginalLandingURL'])).start()
+            Thread(target=append, args=(
+                imageurls, index_info['OriginalURL'])).start()
+            Thread(target=append, args=(
+                type_of_data, index_info['Subset'])).start()
+            Thread(target=append, args=(
+                file_names, f"./data/{image_id}.png")).start()
+            image_id += 1
 
 data = pd.DataFrame({
     'ImageIds': imageids,
