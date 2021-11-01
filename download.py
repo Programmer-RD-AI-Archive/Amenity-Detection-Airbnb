@@ -8,8 +8,8 @@ try:
 except ImportError:
     from urllib import urlretrieve  # Python 2
 classes = pd.read_csv('./classes.csv')
-labelnames = classes['LabelName']
-classnames = classes['DisplayName']
+labelnames = classes['LabelName'].tolist()
+classnames = classes['DisplayName'].tolist()
 __imageids = []
 __imageids_and_bbox = {}
 imageids = []
@@ -37,11 +37,10 @@ imageid_and_labelname.append(pd.read_csv(
     './open_images_data/validation-annotations-human-imagelabels-boxable.csv'))
 imageid_and_labelname.append(pd.read_csv(
     './open_images_data/validation-annotations-machine-imagelabels.csv'))
-
-for imageid, labelname in zip(tqdm(imageid_and_labelname['ImageID']), imageid_and_labelname['LabelName']):
-    print(imageid, labelname)
+tqdm_iter = tqdm(imageid_and_labelname['ImageID'])
+for imageid, labelname in zip(tqdm_iter, imageid_and_labelname['LabelName']):
     if labelname in labelnames:
-        print(imageid)
+        tqdm_iter.set_description(f'{imageid}-{labelname}')
         __imageids.append(imageid)
 
 del imageid_and_labelname
@@ -53,12 +52,14 @@ xmin_ymin_xmax_ymax.append(pd.read_csv(
     './open_images_data/test-annotations-bbox.csv'))
 xmin_ymin_xmax_ymax.append(pd.read_csv(
     './open_images_data/validation-annotations-bbox.csv'))
-for i in tqdm(range(len(xmin_ymin_xmax_ymax))):
+tqdm_iter = tqdm(range(len(xmin_ymin_xmax_ymax)))
+for i in tqdm_iter:
     info = xmin_ymin_xmax_ymax.iloc[i]
     if info['ImageID'] in __imageids:
+        tqdm_iter.set_description(info['ImageID'])
         __imageids_and_bbox[info['ImageID']] = [
             info['XMin'], info['YMin'], info['XMax'], info['YMax']]
-
+del xmin_ymin_xmax_ymax
 
 urls = pd.read_csv(
     './open_images_data/oidv6-train-images-with-labels-with-rotation.csv')
@@ -68,9 +69,11 @@ urls.append(pd.read_csv(
     './open_images_data/train-images-boxable-with-rotation.csv'))
 urls.append(pd.read_csv(
     './open_images_data/validation-images-with-rotation.csv'))
-for i in tqdm(range(len(urls))):
+tqdm_iter = tqdm(range(len(urls)))
+for i in tqdm_iter:
     url = urls.iloc[i]
     if url['ImageID'] in __imageids:
+        tqdm_iter.set_description(url['ImageID'])
         urlretrieve(url['OriginalURL'], f"./data/{image_id}.png")
         xmin, ymin, xmax, ymax = __imageids_and_bbox[url['ImageID']]
         file_names.append(f"./data/{image_id}.png")
