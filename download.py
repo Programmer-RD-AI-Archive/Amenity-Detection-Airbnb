@@ -39,7 +39,9 @@ imageid_and_labelname.append(pd.read_csv(
     './open_images_data/validation-annotations-machine-imagelabels.csv'))
 
 for imageid, labelname in zip(tqdm(imageid_and_labelname['ImageID']), imageid_and_labelname['LabelName']):
+    print(imageid, labelname)
     if labelname in labelnames:
+        print(imageid)
         __imageids.append(imageid)
 
 del imageid_and_labelname
