@@ -3,10 +3,21 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm
 import os
+from threading import Thread
 try:
     from urllib.request import urlretrieve  # Python 3
 except ImportError:
     from urllib import urlretrieve  # Python 2
+
+
+def append(list_to_append, item_to_append):
+    list_to_append.append(item_to_append)
+
+
+def append_dict(dict_to_append, key, val):
+    dict_to_append[key] = val
+
+
 classes = pd.read_csv('./classes.csv')
 labelnames = classes['LabelName'].tolist()
 classnames = classes['DisplayName'].tolist()
@@ -37,11 +48,9 @@ imageid_and_labelname.append(pd.read_csv(
     './open_images_data/validation-annotations-human-imagelabels-boxable.csv'))
 imageid_and_labelname.append(pd.read_csv(
     './open_images_data/validation-annotations-machine-imagelabels.csv'))
-tqdm_iter = tqdm(imageid_and_labelname['ImageID'])
-for imageid, labelname in zip(tqdm_iter, imageid_and_labelname['LabelName']):
+for imageid, labelname in zip(tqdm(imageid_and_labelname['ImageID']), imageid_and_labelname['LabelName']):
     if labelname in labelnames:
-        tqdm_iter.set_description(f'{imageid}-{labelname}')
-        __imageids.append(imageid)
+        Thread(target=append, args=(__imageids, imageid)).start()
 
 del imageid_and_labelname
 
@@ -52,13 +61,13 @@ xmin_ymin_xmax_ymax.append(pd.read_csv(
     './open_images_data/test-annotations-bbox.csv'))
 xmin_ymin_xmax_ymax.append(pd.read_csv(
     './open_images_data/validation-annotations-bbox.csv'))
-tqdm_iter = tqdm(range(len(xmin_ymin_xmax_ymax)))
-for i in tqdm_iter:
+for i in tqdm(range(len(xmin_ymin_xmax_ymax))):
     info = xmin_ymin_xmax_ymax.iloc[i]
     if info['ImageID'] in __imageids:
-        tqdm_iter.set_description(info['ImageID'])
-        __imageids_and_bbox[info['ImageID']] = [
-            info['XMin'], info['YMin'], info['XMax'], info['YMax']]
+        # __imageids_and_bbox[info['ImageID']] = [
+        #     info['XMin'], info['YMin'], info['XMax'], info['YMax']]
+        Thread(target=append_dict, args=(__imageids_and_bbox, info['ImageID'], [
+               info['XMin'], info['YMin'], info['XMax'], info['YMax']])).start()
 del xmin_ymin_xmax_ymax
 
 urls = pd.read_csv(
@@ -69,22 +78,31 @@ urls.append(pd.read_csv(
     './open_images_data/train-images-boxable-with-rotation.csv'))
 urls.append(pd.read_csv(
     './open_images_data/validation-images-with-rotation.csv'))
-tqdm_iter = tqdm(range(len(urls)))
-for i in tqdm_iter:
+for i in tqdm(range(len(urls))):
     url = urls.iloc[i]
     if url['ImageID'] in __imageids:
-        tqdm_iter.set_description(url['ImageID'])
         urlretrieve(url['OriginalURL'], f"./data/{image_id}.png")
         xmin, ymin, xmax, ymax = __imageids_and_bbox[url['ImageID']]
-        file_names.append(f"./data/{image_id}.png")
-        type_of_data.append(url['Subset'])
-        imageurls.append(url['OriginalURL'])
-        imageurls_original.append(url['OriginalLandingURL'])
-        imageids.append(url['ImageID'])
-        xmins.append(xmin)
-        ymins.append(ymin)
-        xmaxs.append(xmax)
-        ymaxs.append(ymax)
+        # file_names.append(f"./data/{image_id}.png")
+        # type_of_data.append(url['Subset'])
+        # imageurls.append(url['OriginalURL'])
+        # imageurls_original.append(url['OriginalLandingURL'])
+        # imageids.append(url['ImageID'])
+        # xmins.append(xmin)
+        # ymins.append(ymin)
+        # xmaxs.append(xmax)
+        # ymaxs.append(ymax)
+        Thread(target=append, args=(ymaxs, ymax)).start()
+        Thread(target=append, args=(xmaxs, xmax)).start()
+        Thread(target=append, args=(ymins, ymin)).start()
+        Thread(target=append, args=(xmins, xmin)).start()
+        Thread(target=append, args=(imageids, url['ImageID'])).start()
+        Thread(target=append, args=(
+            imageurls_original, url['OriginalLandingURL'])).start()
+        Thread(target=append, args=(imageurls, url['OriginalURL'])).start()
+        Thread(target=append, args=(type_of_data, url['Subset'])).start()
+        Thread(target=append, args=(
+            file_names, f"./data/{image_id}.png")).start()
         image_id += 1
 
 data = pd.DataFrame({
