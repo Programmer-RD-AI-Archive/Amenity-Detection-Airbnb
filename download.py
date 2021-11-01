@@ -62,9 +62,9 @@ xmin_ymin_xmax_ymax.append(pd.read_csv(
     './open_images_data/test-annotations-bbox.csv'))
 xmin_ymin_xmax_ymax.append(pd.read_csv(
     './open_images_data/validation-annotations-bbox.csv'))
-for i in tqdm(range(len(xmin_ymin_xmax_ymax))):
-    info = xmin_ymin_xmax_ymax.iloc[i]
-    if info['ImageID'] in __imageids:
+for i in __imageids:
+    info = xmin_ymin_xmax_ymax[xmin_ymin_xmax_ymax['ImageID'] == i]
+    if info['ImageID'] in __imageids and info['LabelName'] in labelnames:
         # __imageids_and_bbox[info['ImageID']] = [
         #     info['XMin'], info['YMin'], info['XMax'], info['YMax']]
         Thread(target=append_dict, args=(__imageids_and_bbox, info['ImageID'], [
