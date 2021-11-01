@@ -62,7 +62,7 @@ xmin_ymin_xmax_ymax.append(pd.read_csv(
     './open_images_data/test-annotations-bbox.csv'))
 xmin_ymin_xmax_ymax.append(pd.read_csv(
     './open_images_data/validation-annotations-bbox.csv'))
-for i in __imageids:
+for i in tqdm(__imageids):
     info = xmin_ymin_xmax_ymax[xmin_ymin_xmax_ymax['ImageID'] == i]
     if info['ImageID'] in __imageids and info['LabelName'] in labelnames:
         # __imageids_and_bbox[info['ImageID']] = [
@@ -79,8 +79,8 @@ urls.append(pd.read_csv(
     './open_images_data/train-images-boxable-with-rotation.csv'))
 urls.append(pd.read_csv(
     './open_images_data/validation-images-with-rotation.csv'))
-for i in tqdm(range(len(urls))):
-    url = urls.iloc[i]
+for i in tqdm(__imageids):
+    url = urls[urls['ImageID'] == i]
     if url['ImageID'] in __imageids:
         urlretrieve(url['OriginalURL'], f"./data/{image_id}.png")
         xmin, ymin, xmax, ymax = __imageids_and_bbox[url['ImageID']]
