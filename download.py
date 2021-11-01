@@ -1,3 +1,4 @@
+import torch
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -117,3 +118,37 @@ data = pd.DataFrame({
     'Type of Data': type_of_data,
 })
 data.to_csv('./data.csv')
+np.save('./output/__imageids.npy', __imageids)
+
+np.save('./output/__imageids_and_bbox.npy', __imageids_and_bbox)
+np.save('./output/imageids.npy', imageids)
+np.save('./output/xmins.npy', xmins)
+np.save('./output/ymins.npy', ymins)
+np.save('./output/xmaxs.npy', xmaxs)
+np.save('./output/file_names.npy', file_names)
+np.save('./output/imageurls.npy', imageurls)
+np.save('./output/imageurls_original.npy', imageurls_original)
+np.save('./output/type_of_data.npy', type_of_data)
+np.save('./output/image_id.npy', image_id)
+torch.save({
+    'ImageIds': imageids,
+    'XMin': xmins,
+    'YMin': ymins,
+    'XMax': xmaxs,
+    'YMax': ymaxs,
+    'File Name': file_names,
+    'ImageUrls': imageurls,
+    'Og_ImageUrls': imageurls_original,
+    'Type of Data': type_of_data,
+}, './output/data.pt')
+torch.save({
+    'ImageIds': imageids,
+    'XMin': xmins,
+    'YMin': ymins,
+    'XMax': xmaxs,
+    'YMax': ymaxs,
+    'File Name': file_names,
+    'ImageUrls': imageurls,
+    'Og_ImageUrls': imageurls_original,
+    'Type of Data': type_of_data,
+}, './output/data.pth')
